@@ -1,0 +1,36 @@
+<html>
+<head>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+<div class="paintAreaContainer">
+    <div class="controls">
+        <div class="group">
+            <label for="color">Color</label>
+            <input type="color" name="color" id="color">
+        </div>
+        <div class="group">
+            <label for="size">Size</label>
+            <input type="range" id="size" name="size" min="0" max="50" step="1" value="2">
+        </div>
+        <div class="group">
+            <label for="export">Export</label>
+            <input type="button" id="export" name="export" value="export">
+        </div>
+        <div class="group">
+            <label for="reset">Reset</label>
+            <input type="button" id="reset" name="reset" value="reset">
+        </div>
+        <div class="group">
+            <label for="tool">Tool</label>
+            <select  id="tool" name="tool">
+                <option value="free">Free</option>
+                <option value="rect">Rectangle</option>
+            </select>
+        </div>
+    </div>
+    <canvas id="paintArea" class="paintArea"></canvas>
+</div>
+<script src="main.bundle.js"></script>
+</body>
+</html>

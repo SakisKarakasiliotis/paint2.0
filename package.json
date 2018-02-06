@@ -1,0 +1,30 @@
+{
+  "name": "paint2.0",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "babel": "babel --presets es2015 src/js/main.js -o dist/js/main.bundle.js",
+    "start": "http-server",
+    "webpack": "webpack",
+    "build-css": "node-sass --include-path src/sass src/sass/main.scss dist/main.css --source-map dist/main.css.map",
+    "watch-css": "nodemon -e scss -x \"npm run build-css\"",
+    "watch-js": "nodemon --watch js -x \"npm run webpack\"",
+    "initial": "npm run watch-css && npm run watch-js"
+  },
+  "author": "mindzblack",
+  "license": "ISC",
+  "dependencies": {
+    "http-server": "^0.11.1"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-es2015": "^6.24.1",
+    "copy-webpack-plugin": "^4.3.1",
+    "node-sass": "^4.7.2",
+    "nodemon": "^1.14.12",
+    "webpack": "^3.10.0",
+    "webpack-dev-server": "^2.11.1"
+  }
+}
