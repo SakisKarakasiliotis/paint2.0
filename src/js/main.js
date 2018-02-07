@@ -15,17 +15,21 @@ function setup() {
     let exportAsPNG = _("#export");
     let reset = _("#reset");
     let tool = _("#tool");
-    pCanvas = new Paint(1024, 532, canvas, color.value, size.value);
-    color.onchange = (e) => {pCanvas.strokeStyle = e.target.value};
-    size.onchange = (e) => {pCanvas.linewidth = e.target.value};
+    pCanvas = new Paint(canvas, 1024, 532, color.value, size.value);
+    color.onchange = (e) => {
+        pCanvas.strokeStyle = e.target.value
+    };
+    size.onchange = (e) => {
+        pCanvas.linewidth = e.target.value
+    };
     exportAsPNG.onclick = () => {
         window.location.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
     };
     reset.onclick = () => {
-      pCanvas.reset();
+        pCanvas.reset();
     };
     tool.onclick = (e) => {
-      pCanvas.mode = e.target.value;
+        pCanvas.mode = e.target.value;
     };
 
 }

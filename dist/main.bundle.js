@@ -135,11 +135,9 @@ var Paint = function () {
         _classCallCheck(this, Paint);
 
         var self = this;
-        this._width = width;
-        this._height = height;
         this._element = element;
-        this._element.width = this._width;
-        this._element.height = this._height;
+        this._element.width = width;
+        this._element.height = height;
         this._drawing = false;
         this._mousePosition = { x: 0, y: 0 };
         this._previousPosition = { x: 0, y: 0 };
@@ -147,15 +145,16 @@ var Paint = function () {
         this._strokeStyle = strokeStyle;
         this._linewidth = linewidth;
         this._mode = "free";
-        this.element.addEventListener("mousedown", function (e) {
+        this._element.addEventListener("mousedown", function (e) {
             return self.listener(e);
         });
-        this.element.addEventListener("mouseup", function (e) {
+        this._element.addEventListener("mouseup", function (e) {
             return self.listener(e);
         });
-        this.element.addEventListener("mousemove", function (e) {
+        this._element.addEventListener("mousemove", function (e) {
             return self.listener(e);
         });
+
         this.resize(width, height);
         this.drawloop();
     }
@@ -165,20 +164,18 @@ var Paint = function () {
         value: function resize(width, height) {
 
             if (height / width > window.innerHeight / window.innerWidth) {
-                this.height = window.innerHeight - 100;
-                this.width = this.height * (width / height);
-            } else {
-                this.width = window.innerWidth - 100;
-                this.height = this.width * (height / width);
+                this._element.height = window.innerHeight - 100;
+                this._element.width = this._element.height * (width / height);
+                return 1;
             }
-
-            this.element.width = this.width;
-            this.element.height = this.height;
+            this._element.width = window.innerWidth - 100;
+            this._element.height = this._element.width * (height / width);
+            return 1;
         }
     }, {
         key: "getMousePosition",
         value: function getMousePosition(event) {
-            var rect = this.element.getBoundingClientRect();
+            var rect = this._element.getBoundingClientRect();
             return {
                 x: event.clientX - rect.left,
                 y: event.clientY - rect.top
@@ -236,22 +233,6 @@ var Paint = function () {
             this._previousPosition = { x: 0, y: 0 };
             this._mousePosition = { x: 0, y: 0 };
             this._ctx.closePath();
-        }
-    }, {
-        key: "width",
-        get: function get() {
-            return this._width;
-        },
-        set: function set(value) {
-            this._width = value;
-        }
-    }, {
-        key: "height",
-        get: function get() {
-            return this._height;
-        },
-        set: function set(value) {
-            this._height = value;
         }
     }, {
         key: "element",

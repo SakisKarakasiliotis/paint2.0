@@ -1,13 +1,11 @@
 class Paint {
 
 
-    constructor(width, height, element, strokeStyle, linewidth) {
+    constructor(element, width, height, strokeStyle, linewidth) {
         const self = this;
-        this._width = width;
-        this._height = height;
         this._element = element;
-        this._element.width = this._width;
-        this._element.height = this._height;
+        this._element.width = width;
+        this._element.height = height;
         this._drawing = false;
         this._mousePosition = {x: 0, y: 0};
         this._previousPosition = {x: 0, y: 0};
@@ -15,29 +13,15 @@ class Paint {
         this._strokeStyle = strokeStyle;
         this._linewidth = linewidth;
         this._mode = "free";
-        this.element.addEventListener("mousedown", (e) => self.listener(e));
-        this.element.addEventListener("mouseup", (e) => self.listener(e));
-        this.element.addEventListener("mousemove", (e) => self.listener(e));
+        this._element.addEventListener("mousedown", (e) => self.listener(e));
+        this._element.addEventListener("mouseup", (e) => self.listener(e));
+        this._element.addEventListener("mousemove", (e) => self.listener(e));
+
         this.resize(width, height);
         this.drawloop();
 
     }
 
-    get width() {
-        return this._width;
-    }
-
-    set width(value) {
-        this._width = value;
-    }
-
-    get height() {
-        return this._height;
-    }
-
-    set height(value) {
-        this._height = value;
-    }
 
     get element() {
         return this._element;
@@ -74,19 +58,18 @@ class Paint {
     resize(width, height) {
 
         if (height / width > window.innerHeight / window.innerWidth) {
-            this.height = window.innerHeight - 100;
-            this.width = this.height * (width / height);
-        } else {
-            this.width = window.innerWidth - 100;
-            this.height = this.width * (height / width);
+            this._element.height = window.innerHeight - 100;
+            this._element.width = this._element.height * (width / height);
+            return 1;
         }
+        this._element.width = window.innerWidth - 100;
+        this._element.height = this._element.width * (height / width);
+        return 1;
 
-        this.element.width = this.width;
-        this.element.height = this.height;
     }
 
     getMousePosition(event) {
-        let rect = this.element.getBoundingClientRect();
+        let rect = this._element.getBoundingClientRect();
         return {
             x: event.clientX - rect.left,
             y: event.clientY - rect.top
@@ -136,7 +119,7 @@ class Paint {
     }
 
     reset() {
-        this._ctx.clearRect(0, 0, this.width, this.height);
+        this._ctx.clearRect(0, 0, this._element.width, this._element.height);
         this._ctx.beginPath();
         this._previousPosition = {x: 0, y: 0};
         this._mousePosition = {x: 0, y: 0};
