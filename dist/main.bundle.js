@@ -84,7 +84,6 @@ var pCanvas = void 0;
 var _ = _DOM2.default._;
 
 window.addEventListener("load", setup);
-window.addEventListener("resize", resize);
 
 function setup() {
     var canvas = _("#paintArea");
@@ -93,7 +92,7 @@ function setup() {
     var exportAsPNG = _("#export");
     var reset = _("#reset");
     var tool = _("#tool");
-    pCanvas = new _paint2.default(1024, 532, canvas, color.value, size.value);
+    pCanvas = new _paint2.default(canvas, 1024, 532, color.value, size.value);
     color.onchange = function (e) {
         pCanvas.strokeStyle = e.target.value;
     };
@@ -107,12 +106,9 @@ function setup() {
         pCanvas.reset();
     };
     tool.onclick = function (e) {
+
         pCanvas.mode = e.target.value;
     };
-}
-
-function resize() {
-    pCanvas.resize(1024, 532);
 }
 
 /***/ }),
@@ -131,7 +127,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Paint = function () {
-    function Paint(width, height, element, strokeStyle, linewidth) {
+    function Paint(element, width, height, strokeStyle, linewidth) {
         _classCallCheck(this, Paint);
 
         var self = this;
@@ -154,23 +150,25 @@ var Paint = function () {
         this._element.addEventListener("mousemove", function (e) {
             return self.listener(e);
         });
-
-        this.resize(width, height);
         this.drawloop();
     }
 
     _createClass(Paint, [{
         key: "resize",
-        value: function resize(width, height) {
 
-            if (height / width > window.innerHeight / window.innerWidth) {
-                this._element.height = window.innerHeight - 100;
-                this._element.width = this._element.height * (width / height);
+        //TODO: FIX dont lose data on resize
+        value: function resize(width, height) {
+            if (this.isset(width) && this.isset(height)) {
+                if (width <= 0 || height <= 0) {
+                    console.error("Invalid parameters on resize()");
+                    return 0;
+                }
+                this._element.width = width;
+                this._element.height = height;
                 return 1;
             }
-            this._element.width = window.innerWidth - 100;
-            this._element.height = this._element.width * (height / width);
-            return 1;
+            console.error("Parameter missing on resize()");
+            return 0;
         }
     }, {
         key: "getMousePosition",
@@ -228,11 +226,21 @@ var Paint = function () {
     }, {
         key: "reset",
         value: function reset() {
-            this._ctx.clearRect(0, 0, this.width, this.height);
+            this._ctx.clearRect(0, 0, this._element.width, this._element.height);
             this._ctx.beginPath();
             this._previousPosition = { x: 0, y: 0 };
             this._mousePosition = { x: 0, y: 0 };
             this._ctx.closePath();
+        }
+    }, {
+        key: "isset",
+        value: function isset(parameter) {
+            return typeof parameter !== 'undefined';
+        }
+    }, {
+        key: "xor",
+        value: function xor(a, b) {
+            return (a || b) && !(a && b);
         }
     }, {
         key: "element",

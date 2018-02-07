@@ -5,7 +5,6 @@ let pCanvas;
 let _ = DOM._;
 
 window.addEventListener("load", setup);
-window.addEventListener("resize", resize);
 
 
 function setup() {
@@ -34,6 +33,3 @@ function setup() {
 
 }
 
-function resize() {
-    pCanvas.resize(1024, 532);
-}

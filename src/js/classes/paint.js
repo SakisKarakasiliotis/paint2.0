@@ -16,10 +16,7 @@ class Paint {
         this._element.addEventListener("mousedown", (e) => self.listener(e));
         this._element.addEventListener("mouseup", (e) => self.listener(e));
         this._element.addEventListener("mousemove", (e) => self.listener(e));
-
-        this.resize(width, height);
         this.drawloop();
-
     }
 
 
@@ -54,17 +51,19 @@ class Paint {
     set mode(value) {
         this._mode = value;
     }
-
+    //TODO: FIX dont lose data on resize
     resize(width, height) {
-
-        if (height / width > window.innerHeight / window.innerWidth) {
-            this._element.height = window.innerHeight - 100;
-            this._element.width = this._element.height * (width / height);
+        if (this.isset(width) && this.isset(height)) {
+            if (width <= 0 || height <= 0) {
+                console.error("Invalid parameters on resize()");
+                return 0;
+            }
+            this._element.width = width;
+            this._element.height = height;
             return 1;
         }
-        this._element.width = window.innerWidth - 100;
-        this._element.height = this._element.width * (height / width);
-        return 1;
+        console.error("Parameter missing on resize()");
+        return 0;
 
     }
 
@@ -127,6 +126,17 @@ class Paint {
 
     }
 
+    isset(parameter) {
+        return typeof parameter !== 'undefined';
+    }
+    //TODO: Figure out a way to save canvas state
+    save(){
+
+    }
+    //TODO: Export canvas to PNG format
+    export(){
+
+    }
 }
 
 export default Paint;
