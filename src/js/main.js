@@ -1,28 +1,27 @@
 import Paint from './classes/paint.js';
+import DOM from './classes/DOM.js';
 
 let pCanvas;
+let _ = DOM._;
 
 window.addEventListener("load", setup);
 window.addEventListener("resize", resize);
 
 
 function setup() {
-    let canvas = document.getElementById("paintArea");
-    let color = document.getElementById("color");
-    let size = document.getElementById("size");
-    let exportAsPNG = document.getElementById("export");
-    let reset = document.getElementById("reset");
-    let tool = document.getElementById("tool");
+    let canvas = _("#paintArea");
+    let color = _("#color");
+    let size = _("#size");
+    let exportAsPNG = _("#export");
+    let reset = _("#reset");
+    let tool = _("#tool");
     pCanvas = new Paint(1024, 532, canvas, color.value, size.value);
-    pCanvas.resize(1024, 532);
-    pCanvas.drawloop();
     color.onchange = (e) => {pCanvas.strokeStyle = e.target.value};
     size.onchange = (e) => {pCanvas.linewidth = e.target.value};
-    exportAsPNG.onclick = (e) => {
-       let image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
-       window.location.href = image;
+    exportAsPNG.onclick = () => {
+        window.location.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
     };
-    reset.onclick = (e) => {
+    reset.onclick = () => {
       pCanvas.reset();
     };
     tool.onclick = (e) => {

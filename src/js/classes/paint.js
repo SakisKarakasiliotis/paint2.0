@@ -18,6 +18,9 @@ class Paint {
         this.element.addEventListener("mousedown", (e) => self.listener(e));
         this.element.addEventListener("mouseup", (e) => self.listener(e));
         this.element.addEventListener("mousemove", (e) => self.listener(e));
+        this.resize(width, height);
+        this.drawloop();
+
     }
 
     get width() {

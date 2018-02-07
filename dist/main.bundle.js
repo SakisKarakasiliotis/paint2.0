@@ -74,34 +74,36 @@ var _paint = __webpack_require__(1);
 
 var _paint2 = _interopRequireDefault(_paint);
 
+var _DOM = __webpack_require__(2);
+
+var _DOM2 = _interopRequireDefault(_DOM);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var pCanvas = void 0;
+var _ = _DOM2.default._;
 
 window.addEventListener("load", setup);
 window.addEventListener("resize", resize);
 
 function setup() {
-    var canvas = document.getElementById("paintArea");
-    var color = document.getElementById("color");
-    var size = document.getElementById("size");
-    var exportAsPNG = document.getElementById("export");
-    var reset = document.getElementById("reset");
-    var tool = document.getElementById("tool");
+    var canvas = _("#paintArea");
+    var color = _("#color");
+    var size = _("#size");
+    var exportAsPNG = _("#export");
+    var reset = _("#reset");
+    var tool = _("#tool");
     pCanvas = new _paint2.default(1024, 532, canvas, color.value, size.value);
-    pCanvas.resize(1024, 532);
-    pCanvas.drawloop();
     color.onchange = function (e) {
         pCanvas.strokeStyle = e.target.value;
     };
     size.onchange = function (e) {
         pCanvas.linewidth = e.target.value;
     };
-    exportAsPNG.onclick = function (e) {
-        var image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
-        window.location.href = image;
+    exportAsPNG.onclick = function () {
+        window.location.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
     };
-    reset.onclick = function (e) {
+    reset.onclick = function () {
         pCanvas.reset();
     };
     tool.onclick = function (e) {
@@ -154,6 +156,8 @@ var Paint = function () {
         this.element.addEventListener("mousemove", function (e) {
             return self.listener(e);
         });
+        this.resize(width, height);
+        this.drawloop();
     }
 
     _createClass(Paint, [{
@@ -208,7 +212,6 @@ var Paint = function () {
                 } else if (this._mode === "rect") {
                     this._ctx.beginPath();
                     this._ctx.fillStyle = this._strokeStyle;
-                    // this._ctx.lineWidth = this._linewidth;
                     this._ctx.rect(this._mousePosition.x, this._mousePosition.y, Math.abs(this._mousePosition.x - this._previousPosition.x), Math.abs(this._mousePosition.y - this._previousPosition.y));
                     this._ctx.fill();
                     this._ctx.closePath();
@@ -288,6 +291,45 @@ var Paint = function () {
 }();
 
 exports.default = Paint;
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var DOM = function () {
+    function DOM() {
+        _classCallCheck(this, DOM);
+    }
+
+    _createClass(DOM, null, [{
+        key: '_',
+        value: function _(selectors) {
+            var selectorType = 'querySelectorAll';
+
+            if (selectors.indexOf('#') === 0) {
+                selectorType = 'getElementById';
+                selectors = selectors.substr(1, selectors.length);
+            }
+
+            return document[selectorType](selectors);
+        }
+    }]);
+
+    return DOM;
+}();
+
+exports.default = DOM;
 
 /***/ })
 /******/ ]);
