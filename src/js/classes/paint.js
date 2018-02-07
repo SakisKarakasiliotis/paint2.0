@@ -13,6 +13,8 @@ class Paint {
         this._strokeStyle = strokeStyle;
         this._linewidth = linewidth;
         this._mode = "free";
+        this._memory = document.createElement('canvas');
+        this._memoryCtx = this._memory.getContext('2d');
         this._element.addEventListener("mousedown", (e) => self.listener(e));
         this._element.addEventListener("mouseup", (e) => self.listener(e));
         this._element.addEventListener("mousemove", (e) => self.listener(e));
@@ -51,8 +53,9 @@ class Paint {
     set mode(value) {
         this._mode = value;
     }
-    //TODO: FIX dont lose data on resize
+
     resize(width, height) {
+        this.save();
         if (this.isset(width) && this.isset(height)) {
             if (width <= 0 || height <= 0) {
                 console.error("Invalid parameters on resize()");
@@ -60,6 +63,7 @@ class Paint {
             }
             this._element.width = width;
             this._element.height = height;
+            this.restore();
             return 1;
         }
         console.error("Parameter missing on resize()");
@@ -129,12 +133,19 @@ class Paint {
     isset(parameter) {
         return typeof parameter !== 'undefined';
     }
-    //TODO: Figure out a way to save canvas state
-    save(){
 
+    save() {
+        this._memory.width = this._element.width;
+        this._memory.height = this._element.height;
+        this._memoryCtx.drawImage(this._element, 0, 0);
     }
+
+    restore() {
+        this._ctx.drawImage(this._memory, 0, 0);
+    }
+
     //TODO: Export canvas to PNG format
-    export(){
+    export() {
 
     }
 }

@@ -103,10 +103,10 @@ function setup() {
         window.location.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
     };
     reset.onclick = function () {
-        pCanvas.reset();
+        // pCanvas.reset();
+        pCanvas.resize(500, 250);
     };
     tool.onclick = function (e) {
-
         pCanvas.mode = e.target.value;
     };
 }
@@ -141,6 +141,8 @@ var Paint = function () {
         this._strokeStyle = strokeStyle;
         this._linewidth = linewidth;
         this._mode = "free";
+        this._memory = document.createElement('canvas');
+        this._memoryCtx = this._memory.getContext('2d');
         this._element.addEventListener("mousedown", function (e) {
             return self.listener(e);
         });
@@ -156,8 +158,9 @@ var Paint = function () {
     _createClass(Paint, [{
         key: "resize",
 
-        //TODO: FIX dont lose data on resize
+        //TODO: FIX don't lose data on resize
         value: function resize(width, height) {
+            this.save();
             if (this.isset(width) && this.isset(height)) {
                 if (width <= 0 || height <= 0) {
                     console.error("Invalid parameters on resize()");
@@ -165,6 +168,7 @@ var Paint = function () {
                 }
                 this._element.width = width;
                 this._element.height = height;
+                this.restore();
                 return 1;
             }
             console.error("Parameter missing on resize()");
@@ -238,10 +242,24 @@ var Paint = function () {
             return typeof parameter !== 'undefined';
         }
     }, {
-        key: "xor",
-        value: function xor(a, b) {
-            return (a || b) && !(a && b);
+        key: "save",
+        value: function save() {
+            // this._ctx.save();
+            this._memory.width = this._element.width;
+            this._memory.height = this._element.height;
+            this._memoryCtx.drawImage(this._element, 0, 0);
         }
+    }, {
+        key: "restore",
+        value: function restore() {
+            // this._ctx.restore();
+            this._ctx.drawImage(this._memory, 0, 0);
+        }
+        //TODO: Export canvas to PNG format
+
+    }, {
+        key: "export",
+        value: function _export() {}
     }, {
         key: "element",
         get: function get() {

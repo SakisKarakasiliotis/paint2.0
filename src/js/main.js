@@ -25,7 +25,8 @@ function setup() {
         window.location.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
     };
     reset.onclick = () => {
-        pCanvas.reset();
+        // pCanvas.reset();
+        pCanvas.resize(500, 250);
     };
     tool.onclick = (e) => {
         pCanvas.mode = e.target.value;
