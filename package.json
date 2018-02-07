@@ -8,9 +8,7 @@
     "start": "http-server",
     "webpack": "webpack",
     "build-css": "node-sass --include-path src/sass src/sass/main.scss dist/main.css --source-map dist/main.css.map",
-    "watch-css": "nodemon -e scss -x \"npm run build-css\"",
-    "watch-js": "nodemon --watch js -x \"npm run webpack\"",
-    "initial": "npm run watch-css && npm run watch-js"
+    "watch-css": "nodemon -e scss -x \"npm run build-css\""
   },
   "author": "mindzblack",
   "license": "ISC",

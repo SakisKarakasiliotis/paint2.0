@@ -8,30 +8,23 @@
   grid-column-gap: 10px;
   grid-row-gap: 0;
   justify-items: center;
-  align-items: center; }
+  align-items: center;
+}
 
 .logo {
-  grid-area: logo; }
+  grid-area: logo;
+}
 
 .controls {
   grid-area: tools;
   display: flex;
-  flex-direction: column; }
+  flex-direction: column;
+}
 
 .paintArea {
   grid-area: canvas;
   justify-self: start;
-  align-self: start; }
+  align-self: start;
+}
 
-body {
-  margin: 0;
-  font: 1em sans-serif;
-  background-color: #fff; }
 
-.paintArea {
-  border: 5px dashed #cccccc; }
-
-canvas {
-  cursor: url("./img/paintbrush.png"), auto; }
-
-/*# sourceMappingURL=main.css.map */

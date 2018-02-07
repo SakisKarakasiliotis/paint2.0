@@ -21,7 +21,6 @@ class Paint {
         this.drawloop();
     }
 
-
     get element() {
         return this._element;
     }
@@ -68,7 +67,6 @@ class Paint {
         }
         console.error("Parameter missing on resize()");
         return 0;
-
     }
 
     getMousePosition(event) {
@@ -127,7 +125,6 @@ class Paint {
         this._previousPosition = {x: 0, y: 0};
         this._mousePosition = {x: 0, y: 0};
         this._ctx.closePath();
-
     }
 
     isset(parameter) {

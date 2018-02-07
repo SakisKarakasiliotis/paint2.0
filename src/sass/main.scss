@@ -1,29 +1,16 @@
 @import "variables/variables";
+@import "grid/grid";
 
 body {
   margin: 0;
   font: 1em sans-serif;
   background-color: #fff;
-
-}
-
-.title {
-  padding: 20px;
-  color: $primary-color;
-  margin: 0;
-}
-
-.subtitle {
-  color: $primary-color;
-}
-
-.paintAreaContainer {
-  width: 100%;
-  height: auto;
-  text-align: center;
 }
 
 .paintArea {
-  border: 1px solid red;
-  margin: 20px auto;
+  border: 5px dashed #cccccc;
+}
+
+canvas {
+  cursor: url('./img/paintbrush.png'), auto;
 }

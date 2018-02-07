@@ -92,7 +92,7 @@ function setup() {
     var exportAsPNG = _("#export");
     var reset = _("#reset");
     var tool = _("#tool");
-    pCanvas = new _paint2.default(canvas, 1024, 532, color.value, size.value);
+    pCanvas = new _paint2.default(canvas, 1024, 652, color.value, size.value);
     color.onchange = function (e) {
         pCanvas.strokeStyle = e.target.value;
     };
@@ -103,8 +103,7 @@ function setup() {
         window.location.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
     };
     reset.onclick = function () {
-        // pCanvas.reset();
-        pCanvas.resize(500, 250);
+        pCanvas.reset();
     };
     tool.onclick = function (e) {
         pCanvas.mode = e.target.value;
@@ -157,8 +156,6 @@ var Paint = function () {
 
     _createClass(Paint, [{
         key: "resize",
-
-        //TODO: FIX don't lose data on resize
         value: function resize(width, height) {
             this.save();
             if (this.isset(width) && this.isset(height)) {
@@ -244,7 +241,6 @@ var Paint = function () {
     }, {
         key: "save",
         value: function save() {
-            // this._ctx.save();
             this._memory.width = this._element.width;
             this._memory.height = this._element.height;
             this._memoryCtx.drawImage(this._element, 0, 0);
@@ -252,9 +248,9 @@ var Paint = function () {
     }, {
         key: "restore",
         value: function restore() {
-            // this._ctx.restore();
             this._ctx.drawImage(this._memory, 0, 0);
         }
+
         //TODO: Export canvas to PNG format
 
     }, {
@@ -323,12 +319,10 @@ var DOM = function () {
         key: '_',
         value: function _(selectors) {
             var selectorType = 'querySelectorAll';
-
             if (selectors.indexOf('#') === 0) {
                 selectorType = 'getElementById';
                 selectors = selectors.substr(1, selectors.length);
             }
-
             return document[selectorType](selectors);
         }
     }]);

@@ -23,10 +23,14 @@ module.exports = {
         new CopyWebpackPlugin([
             {
                 from: {
-                    glob:'src/index.html',
+                    glob: 'src/index.html',
                     dot: true
                 },
                 to: 'index.html'
+            },
+            {
+                from: 'src/img',
+                to: 'img',
             },
         ])
     ],
