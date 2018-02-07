@@ -2,7 +2,6 @@ class Paint {
 
 
     constructor(element, width, height, strokeStyle, linewidth) {
-        const self = this;
         this._element = element;
         this._element.width = width;
         this._element.height = height;
@@ -15,9 +14,9 @@ class Paint {
         this._mode = "free";
         this._memory = document.createElement('canvas');
         this._memoryCtx = this._memory.getContext('2d');
-        this._element.addEventListener("mousedown", (e) => self.listener(e));
-        this._element.addEventListener("mouseup", (e) => self.listener(e));
-        this._element.addEventListener("mousemove", (e) => self.listener(e));
+        this._element.addEventListener("mousedown", (e) => this.listener(e));
+        this._element.addEventListener("mouseup", (e) => this.listener(e));
+        this._element.addEventListener("mousemove", (e) => this.listener(e));
         this.drawloop();
     }
 
