@@ -19,3 +19,7 @@ canvas {
 .tool option{
   text-transform: capitalize;
 }
+
+.draggable{
+  cursor: nwse-resize !important;
+}

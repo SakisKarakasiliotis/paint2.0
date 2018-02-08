@@ -81,6 +81,7 @@ var _DOM2 = _interopRequireDefault(_DOM);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var _ = _DOM2.default._;
+var _t = _DOM2.default.toggleClass;
 
 var pCanvas = void 0;
 var canvas = _("#paintArea");
@@ -89,6 +90,7 @@ var size = _("#size");
 var exportAsPNG = _("#export");
 var reset = _("#reset");
 var tool = _("#tool");
+var dragging = true;
 
 window.addEventListener("load", setup);
 
@@ -98,6 +100,48 @@ function setup() {
     pCanvas.modes.forEach(function (mode) {
         return tool.innerHTML += '<option value="' + mode + '">' + mode + '</option>';
     });
+
+    // TODO: add in class logic + bound to fathers size
+    document.onmousedown = function (event) {
+        var rect = canvas.getBoundingClientRect();
+        var a = {
+            x: event.clientX - rect.left,
+            y: event.clientY - rect.top
+        };
+
+        if (a.x >= canvas.width && a.x < canvas.width + 10 && a.y >= canvas.height && a.y < canvas.height + 10) {
+
+            dragging = true;
+        }
+    };
+
+    document.onmouseup = function (event) {
+        console.log(event);
+        if (!dragging) return;
+        dragging = !dragging;
+        var rect = canvas.getBoundingClientRect();
+        var a = {
+            x: event.clientX - rect.left,
+            y: event.clientY - rect.top
+        };
+        pCanvas.resize(a.x, a.y);
+        _t(_("#main"), "draggable");
+        _t(canvas, "draggable");
+    };
+
+    document.onmouseover = function (event) {
+        var rect = canvas.getBoundingClientRect();
+        var a = {
+            x: event.clientX - rect.left,
+            y: event.clientY - rect.top
+        };
+
+        if (a.x >= canvas.width && a.x < canvas.width + 10 && a.y >= canvas.height && a.y < canvas.height + 10) {
+
+            _t(_("#main"), "draggable");
+            _t(canvas, "draggable");
+        }
+    };
 
     document.onkeydown = function (e) {
         var eventobj = window.event ? window.event : e;
@@ -426,6 +470,26 @@ var DOM = function () {
                 selectors = selectors.substr(1, selectors.length);
             }
             return document[selectorType](selectors);
+        }
+    }, {
+        key: 'hasClass',
+        value: function hasClass(el, className) {
+            return el.classList.contains(className);
+        }
+    }, {
+        key: 'addClass',
+        value: function addClass(el, className) {
+            el.classList.add(className);
+        }
+    }, {
+        key: 'removeClass',
+        value: function removeClass(el, className) {
+            el.classList.remove(className);
+        }
+    }, {
+        key: 'toggleClass',
+        value: function toggleClass(el, className) {
+            el.classList.toggle(className);
         }
     }]);
 
