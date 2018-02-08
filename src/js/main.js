@@ -16,6 +16,9 @@ window.addEventListener("load", setup);
 function setup() {
 
     pCanvas = new Paint(canvas, 1024, 652, color.value, size.value);
+    pCanvas.modes.forEach((mode) =>
+        tool.innerHTML += `<option value="${mode}">${mode}</option>`
+    );
     color.onchange = (e) => {
         pCanvas.strokeStyle = e.target.value
     };

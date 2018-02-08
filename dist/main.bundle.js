@@ -95,6 +95,9 @@ window.addEventListener("load", setup);
 function setup() {
 
     pCanvas = new _paint2.default(canvas, 1024, 652, color.value, size.value);
+    pCanvas.modes.forEach(function (mode) {
+        return tool.innerHTML += '<option value="' + mode + '">' + mode + '</option>';
+    });
     color.onchange = function (e) {
         pCanvas.strokeStyle = e.target.value;
     };
@@ -138,13 +141,15 @@ var Paint = function () {
         this._element.height = height;
         this._drawing = false;
         this._mousePosition = { x: 0, y: 0 };
-        this._previousPosition = { x: 0, y: 0 };
+        // this._previousPosition = {x: 0, y: 0};
+        this._previousPosition = {};
         this._ctx = this.element.getContext("2d");
         this._strokeStyle = strokeStyle;
         this._linewidth = linewidth;
-        this._mode = "free";
+        this._mode = 'free';
         this._memory = document.createElement('canvas');
         this._memoryCtx = this._memory.getContext('2d');
+        this._modes = ['free', 'rect', 'eraser', 'line'];
         this._element.addEventListener("mousedown", function (e) {
             return _this.listener(e);
         });
@@ -158,7 +163,7 @@ var Paint = function () {
     }
 
     _createClass(Paint, [{
-        key: "resize",
+        key: 'resize',
         value: function resize(width, height) {
             this.save();
             if (this.isset(width) && this.isset(height)) {
@@ -175,7 +180,7 @@ var Paint = function () {
             return 0;
         }
     }, {
-        key: "getMousePosition",
+        key: 'getMousePosition',
         value: function getMousePosition(event) {
             var rect = this._element.getBoundingClientRect();
             return {
@@ -184,22 +189,32 @@ var Paint = function () {
             };
         }
     }, {
-        key: "listener",
+        key: 'listener',
         value: function listener(event) {
-            if (event.type === 'mousedown') {
-                this._drawing = true;
-                this._previousPosition = this.getMousePosition(event);
-            } else if (event.type === 'mouseup') {
-                this._drawing = false;
-            } else if (event.type === 'mousemove') {
-                this._mousePosition = this.getMousePosition(event);
+            if (this._mode === 'line' || this.mode === 'rect') {
+                if (event.type === 'mousedown') {
+                    this._drawing = false;
+                    this._previousPosition = this.getMousePosition(event);
+                } else if (event.type === 'mouseup') {
+                    this._drawing = true;
+                    this._mousePosition = this.getMousePosition(event);
+                }
+            } else {
+                if (event.type === 'mousedown') {
+                    this._drawing = true;
+                    this._previousPosition = this.getMousePosition(event);
+                } else if (event.type === 'mouseup') {
+                    this._drawing = false;
+                } else if (event.type === 'mousemove') {
+                    this._mousePosition = this.getMousePosition(event);
+                }
             }
         }
     }, {
-        key: "render",
+        key: 'render',
         value: function render() {
             if (this._drawing) {
-                if (this._mode === "free" || this._mode === "eraser") {
+                if (this._mode === "free" || this._mode === "eraser" || this._mode === 'line') {
                     this._ctx.beginPath();
                     this._ctx.globalCompositeOperation = this._mode === "eraser" ? 'destination-out' : 'source-over';
                     this._ctx.strokeStyle = this._mode === "eraser" ? "rgba(0,0,0,1)" : this._strokeStyle;
@@ -209,18 +224,23 @@ var Paint = function () {
                     this._ctx.lineTo(this._mousePosition.x, this._mousePosition.y);
                     this._ctx.stroke();
                     this._ctx.closePath();
-                    this._previousPosition = this._mousePosition;
+                    this._previousPosition = this._mode === 'line' ? {} : this._mousePosition;
+                    this._ctx.save();
                 } else if (this._mode === "rect") {
                     this._ctx.beginPath();
                     this._ctx.fillStyle = this._strokeStyle;
-                    this._ctx.rect(this._mousePosition.x, this._mousePosition.y, Math.abs(this._mousePosition.x - this._previousPosition.x), Math.abs(this._mousePosition.y - this._previousPosition.y));
+                    var quadrant = {
+                        x: this._mousePosition.x < this._previousPosition.x ? this._mousePosition.x : this._previousPosition.x,
+                        y: this._mousePosition.y < this._previousPosition.y ? this._mousePosition.y : this._previousPosition.y
+                    };
+                    this._ctx.rect(quadrant.x, quadrant.y, Math.abs(this._mousePosition.x - this._previousPosition.x), Math.abs(this._mousePosition.y - this._previousPosition.y));
                     this._ctx.fill();
                     this._ctx.closePath();
                 }
             }
         }
     }, {
-        key: "drawloop",
+        key: 'drawloop',
         value: function drawloop() {
             var _this2 = this;
 
@@ -230,28 +250,29 @@ var Paint = function () {
             this.render();
         }
     }, {
-        key: "reset",
+        key: 'reset',
         value: function reset() {
-            this._ctx.clearRect(0, 0, this._element.width, this._element.height);
-            this._ctx.beginPath();
-            this._previousPosition = { x: 0, y: 0 };
-            this._mousePosition = { x: 0, y: 0 };
-            this._ctx.closePath();
+            // this._ctx.clearRect(0, 0, this._element.width, this._element.height);
+            // this._ctx.beginPath();
+            // this._previousPosition = {x: 0, y: 0};
+            // this._mousePosition = {x: 0, y: 0};
+            // this._ctx.closePath();
+            this._ctx.restore();
         }
     }, {
-        key: "isset",
+        key: 'isset',
         value: function isset(parameter) {
             return typeof parameter !== 'undefined';
         }
     }, {
-        key: "save",
+        key: 'save',
         value: function save() {
             this._memory.width = this._element.width;
             this._memory.height = this._element.height;
             this._memoryCtx.drawImage(this._element, 0, 0);
         }
     }, {
-        key: "restore",
+        key: 'restore',
         value: function restore() {
             this._ctx.drawImage(this._memory, 0, 0);
         }
@@ -259,10 +280,10 @@ var Paint = function () {
         //TODO: Export canvas to PNG format
 
     }, {
-        key: "export",
+        key: 'export',
         value: function _export() {}
     }, {
-        key: "element",
+        key: 'element',
         get: function get() {
             return this._element;
         },
@@ -270,7 +291,7 @@ var Paint = function () {
             this._element = value;
         }
     }, {
-        key: "strokeStyle",
+        key: 'strokeStyle',
         get: function get() {
             return this._strokeStyle;
         },
@@ -278,7 +299,7 @@ var Paint = function () {
             this._strokeStyle = value;
         }
     }, {
-        key: "linewidth",
+        key: 'linewidth',
         get: function get() {
             return this._linewidth;
         },
@@ -286,12 +307,17 @@ var Paint = function () {
             this._linewidth = value;
         }
     }, {
-        key: "mode",
+        key: 'mode',
         get: function get() {
             return this._mode;
         },
         set: function set(value) {
             this._mode = value;
+        }
+    }, {
+        key: 'modes',
+        get: function get() {
+            return this._modes;
         }
     }]);
 

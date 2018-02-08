@@ -35,4 +35,7 @@ canvas {
   cursor: url("./img/paintbrush.cur"), auto;
   cursor: url("./img/paintbrush.png") 4 20, auto; }
 
+.tool option {
+  text-transform: capitalize; }
+
 /*# sourceMappingURL=main.css.map */
