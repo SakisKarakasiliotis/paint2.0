@@ -80,18 +80,20 @@ var _DOM2 = _interopRequireDefault(_DOM);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var pCanvas = void 0;
 var _ = _DOM2.default._;
+
+var pCanvas = void 0;
+var canvas = _("#paintArea");
+var color = _("#color");
+var size = _("#size");
+var exportAsPNG = _("#export");
+var reset = _("#reset");
+var tool = _("#tool");
 
 window.addEventListener("load", setup);
 
 function setup() {
-    var canvas = _("#paintArea");
-    var color = _("#color");
-    var size = _("#size");
-    var exportAsPNG = _("#export");
-    var reset = _("#reset");
-    var tool = _("#tool");
+
     pCanvas = new _paint2.default(canvas, 1024, 652, color.value, size.value);
     color.onchange = function (e) {
         pCanvas.strokeStyle = e.target.value;
@@ -127,9 +129,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var Paint = function () {
     function Paint(element, width, height, strokeStyle, linewidth) {
+        var _this = this;
+
         _classCallCheck(this, Paint);
 
-        var self = this;
         this._element = element;
         this._element.width = width;
         this._element.height = height;
@@ -143,13 +146,13 @@ var Paint = function () {
         this._memory = document.createElement('canvas');
         this._memoryCtx = this._memory.getContext('2d');
         this._element.addEventListener("mousedown", function (e) {
-            return self.listener(e);
+            return _this.listener(e);
         });
         this._element.addEventListener("mouseup", function (e) {
-            return self.listener(e);
+            return _this.listener(e);
         });
         this._element.addEventListener("mousemove", function (e) {
-            return self.listener(e);
+            return _this.listener(e);
         });
         this.drawloop();
     }
@@ -196,10 +199,12 @@ var Paint = function () {
         key: "render",
         value: function render() {
             if (this._drawing) {
-                if (this._mode === "free") {
+                if (this._mode === "free" || this._mode === "eraser") {
                     this._ctx.beginPath();
-                    this._ctx.strokeStyle = this._strokeStyle;
+                    this._ctx.globalCompositeOperation = this._mode === "eraser" ? 'destination-out' : 'source-over';
+                    this._ctx.strokeStyle = this._mode === "eraser" ? "rgba(0,0,0,1)" : this._strokeStyle;
                     this._ctx.lineWidth = this._linewidth;
+                    this._ctx.lineCap = 'round';
                     this._ctx.moveTo(this._previousPosition.x, this._previousPosition.y);
                     this._ctx.lineTo(this._mousePosition.x, this._mousePosition.y);
                     this._ctx.stroke();
@@ -217,10 +222,10 @@ var Paint = function () {
     }, {
         key: "drawloop",
         value: function drawloop() {
-            var _this = this;
+            var _this2 = this;
 
             requestAnimationFrame(function () {
-                return _this.drawloop();
+                return _this2.drawloop();
             });
             this.render();
         }

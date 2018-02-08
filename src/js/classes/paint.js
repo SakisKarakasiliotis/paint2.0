@@ -89,10 +89,13 @@ class Paint {
 
     render() {
         if (this._drawing) {
-            if (this._mode === "free") {
+            if (this._mode === "free"
+                || this._mode === "eraser") {
                 this._ctx.beginPath();
-                this._ctx.strokeStyle = this._strokeStyle;
+                this._ctx.globalCompositeOperation = this._mode === "eraser" ? 'destination-out' : 'source-over';
+                this._ctx.strokeStyle = this._mode === "eraser" ? "rgba(0,0,0,1)" : this._strokeStyle;
                 this._ctx.lineWidth = this._linewidth;
+                this._ctx.lineCap = 'round';
                 this._ctx.moveTo(this._previousPosition.x, this._previousPosition.y);
                 this._ctx.lineTo(this._mousePosition.x, this._mousePosition.y);
                 this._ctx.stroke();

@@ -32,6 +32,7 @@ body {
   border: 5px dashed #cccccc; }
 
 canvas {
-  cursor: url("./img/paintbrush.png"), auto; }
+  cursor: url("./img/paintbrush.cur"), auto;
+  cursor: url("./img/paintbrush.png") 4 20, auto; }
 
 /*# sourceMappingURL=main.css.map */

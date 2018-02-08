@@ -1,19 +1,20 @@
 import Paint from './classes/paint.js';
 import DOM from './classes/DOM.js';
+const _ = DOM._;
 
 let pCanvas;
-let _ = DOM._;
+let canvas = _("#paintArea");
+let color = _("#color");
+let size = _("#size");
+let exportAsPNG = _("#export");
+let reset = _("#reset");
+let tool = _("#tool");
 
 window.addEventListener("load", setup);
 
 
 function setup() {
-    let canvas = _("#paintArea");
-    let color = _("#color");
-    let size = _("#size");
-    let exportAsPNG = _("#export");
-    let reset = _("#reset");
-    let tool = _("#tool");
+
     pCanvas = new Paint(canvas, 1024, 652, color.value, size.value);
     color.onchange = (e) => {
         pCanvas.strokeStyle = e.target.value
