@@ -1,18 +1,21 @@
 class Paint {
 
-    constructor(element, width=500, height=500, strokeStyle='#ccc', linewidth='5') {
+    constructor(element, width=500, height=500, strokeStyle='#ccc', linewidth='5', backgroundColor='#ffffff') {
         // User parameters
         this._element = element;
         this._element.width = width;
         this._element.height = height;
         this._strokeStyle = strokeStyle;
         this._linewidth = linewidth;
+        this._backgroundColor = backgroundColor;
         // Utility parameters
         this._drawing = false;
         this._mousePosition = {x: 0, y: 0};
         this._previousPosition = {};
         this._ctx = this._element.getContext("2d");
         this._mode = 'free';
+        this._ctx.fillStyle = this._backgroundColor;
+        this._ctx.fillRect(0, 0, this._element.width, this._element.height);
         // Helpers
         this._modes = [
             'free',
@@ -82,6 +85,8 @@ class Paint {
             }
             this._element.width = width;
             this._element.height = height;
+            this._ctx.fillStyle = this._backgroundColor;
+            this._ctx.fillRect(0, 0, this._element.width, this._element.height);
             this._ctx.drawImage(memory, 0, 0);
 
             return 1;
