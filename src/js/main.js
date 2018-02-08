@@ -1,5 +1,6 @@
 import Paint from './classes/paint.js';
 import DOM from './classes/DOM.js';
+
 const _ = DOM._;
 
 let pCanvas;
@@ -19,6 +20,17 @@ function setup() {
     pCanvas.modes.forEach((mode) =>
         tool.innerHTML += `<option value="${mode}">${mode}</option>`
     );
+
+    document.onkeydown = (e) => {
+        let eventobj = window.event ? window.event : e;
+        if (eventobj.key === 'z' && eventobj.ctrlKey && !eventobj.shiftKey){
+            pCanvas.undo();
+        }
+        else if (eventobj.key === 'Z' && eventobj.ctrlKey && eventobj.shiftKey){
+            pCanvas.redo();
+        }
+    };
+
     color.onchange = (e) => {
         pCanvas.strokeStyle = e.target.value
     };

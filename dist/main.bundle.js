@@ -98,6 +98,16 @@ function setup() {
     pCanvas.modes.forEach(function (mode) {
         return tool.innerHTML += '<option value="' + mode + '">' + mode + '</option>';
     });
+
+    document.onkeydown = function (e) {
+        var eventobj = window.event ? window.event : e;
+        if (eventobj.key === 'z' && eventobj.ctrlKey && !eventobj.shiftKey) {
+            pCanvas.undo();
+        } else if (eventobj.key === 'Z' && eventobj.ctrlKey && eventobj.shiftKey) {
+            pCanvas.redo();
+        }
+    };
+
     color.onchange = function (e) {
         pCanvas.strokeStyle = e.target.value;
     };
@@ -108,7 +118,8 @@ function setup() {
         window.location.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
     };
     reset.onclick = function () {
-        pCanvas.reset();
+        // pCanvas.reset();
+        pCanvas.resize(900, 800);
     };
     tool.onclick = function (e) {
         pCanvas.mode = e.target.value;
@@ -136,20 +147,24 @@ var Paint = function () {
 
         _classCallCheck(this, Paint);
 
+        // User parameters
         this._element = element;
         this._element.width = width;
         this._element.height = height;
-        this._drawing = false;
-        this._mousePosition = { x: 0, y: 0 };
-        // this._previousPosition = {x: 0, y: 0};
-        this._previousPosition = {};
-        this._ctx = this.element.getContext("2d");
         this._strokeStyle = strokeStyle;
         this._linewidth = linewidth;
+        // Utility parameters
+        this._drawing = false;
+        this._mousePosition = { x: 0, y: 0 };
+        this._previousPosition = {};
+        this._ctx = this._element.getContext("2d");
         this._mode = 'free';
-        this._memory = document.createElement('canvas');
-        this._memoryCtx = this._memory.getContext('2d');
+        // Helpers
         this._modes = ['free', 'rect', 'eraser', 'line'];
+        this._undo = [];
+        this._undo.push(this._element.toDataURL());
+        this._redo = [];
+        // Listeners
         this._element.addEventListener("mousedown", function (e) {
             return _this.listener(e);
         });
@@ -159,6 +174,7 @@ var Paint = function () {
         this._element.addEventListener("mousemove", function (e) {
             return _this.listener(e);
         });
+        // Init paint
         this.drawloop();
     }
 
@@ -166,6 +182,11 @@ var Paint = function () {
         key: 'resize',
         value: function resize(width, height) {
             this.save();
+            var memory = document.createElement('canvas');
+            var memoryCtx = memory.getContext('2d');
+            memory.width = this._element.width;
+            memory.height = this._element.height;
+            memoryCtx.drawImage(this._element, 0, 0);
             if (this.isset(width) && this.isset(height)) {
                 if (width <= 0 || height <= 0) {
                     console.error("Invalid parameters on resize()");
@@ -173,7 +194,8 @@ var Paint = function () {
                 }
                 this._element.width = width;
                 this._element.height = height;
-                this.restore();
+                this._ctx.drawImage(memory, 0, 0);
+
                 return 1;
             }
             console.error("Parameter missing on resize()");
@@ -196,11 +218,13 @@ var Paint = function () {
                     this._drawing = false;
                     this._previousPosition = this.getMousePosition(event);
                 } else if (event.type === 'mouseup') {
+                    this.save();
                     this._drawing = true;
                     this._mousePosition = this.getMousePosition(event);
                 }
             } else {
                 if (event.type === 'mousedown') {
+                    this.save();
                     this._drawing = true;
                     this._previousPosition = this.getMousePosition(event);
                 } else if (event.type === 'mouseup') {
@@ -225,7 +249,6 @@ var Paint = function () {
                     this._ctx.stroke();
                     this._ctx.closePath();
                     this._previousPosition = this._mode === 'line' ? {} : this._mousePosition;
-                    this._ctx.save();
                 } else if (this._mode === "rect") {
                     this._ctx.beginPath();
                     this._ctx.fillStyle = this._strokeStyle;
@@ -252,29 +275,63 @@ var Paint = function () {
     }, {
         key: 'reset',
         value: function reset() {
-            // this._ctx.clearRect(0, 0, this._element.width, this._element.height);
-            // this._ctx.beginPath();
-            // this._previousPosition = {x: 0, y: 0};
-            // this._mousePosition = {x: 0, y: 0};
-            // this._ctx.closePath();
-            this._ctx.restore();
+            this._ctx.clearRect(0, 0, this._element.width, this._element.height);
+            this._ctx.beginPath();
+            this._previousPosition = { x: 0, y: 0 };
+            this._mousePosition = { x: 0, y: 0 };
+            this._ctx.closePath();
+            this._undo = [];
+            this._redo = [];
         }
     }, {
         key: 'isset',
         value: function isset(parameter) {
             return typeof parameter !== 'undefined';
         }
+
+        // Much needed credits for undo/redo functionality https://codepen.io/abidibo/
+
     }, {
         key: 'save',
         value: function save() {
-            this._memory.width = this._element.width;
-            this._memory.height = this._element.height;
-            this._memoryCtx.drawImage(this._element, 0, 0);
+            var list = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this._undo;
+            var keepRedo = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+            if (!keepRedo) this._redo = [];
+            list.push(this._element.toDataURL());
         }
     }, {
         key: 'restore',
-        value: function restore() {
-            this._ctx.drawImage(this._memory, 0, 0);
+        value: function restore(pop, push) {
+            var _this3 = this;
+
+            var resize = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+            if (pop.length && !resize) {
+                this.save(push, true);
+                var reset = pop.pop();
+                var img = document.createElement('img');
+                img.src = reset;
+                img.onload = function () {
+                    _this3._ctx.clearRect(0, 0, _this3._element.width, _this3._element.height);
+                    _this3._ctx.drawImage(img, 0, 0, _this3._element.width, _this3._element.height, 0, 0, _this3._element.width, _this3._element.height);
+                };
+            } else if (resize) {
+                while (pop.length > 1) {
+                    pop.pop();
+                }
+                this.restore(pop, push);
+            }
+        }
+    }, {
+        key: 'undo',
+        value: function undo() {
+            this.restore(this._undo, this._redo);
+        }
+    }, {
+        key: 'redo',
+        value: function redo() {
+            this.restore(this._redo, this._undo);
         }
 
         //TODO: Export canvas to PNG format
