@@ -1,6 +1,6 @@
 class Paint {
 
-    constructor(element, width, height, strokeStyle, linewidth) {
+    constructor(element, width=500, height=500, strokeStyle='#ccc', linewidth='5') {
         // User parameters
         this._element = element;
         this._element.width = width;
@@ -27,6 +27,7 @@ class Paint {
         this._element.addEventListener("mousedown", (e) => this.listener(e));
         this._element.addEventListener("mouseup", (e) => this.listener(e));
         this._element.addEventListener("mousemove", (e) => this.listener(e));
+        this._element.addEventListener("mouseout", (e) => this.listener(e));
         // Init paint
         this.drawloop();
     }
@@ -98,6 +99,9 @@ class Paint {
     }
 
     listener(event) {
+        if(event.type === 'mouseout'){
+            this._drawing = false;
+        }
         if (this._mode === 'line'
             || this.mode === 'rect') {
             if (event.type === 'mousedown') {

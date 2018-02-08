@@ -141,8 +141,14 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Paint = function () {
-    function Paint(element, width, height, strokeStyle, linewidth) {
+    function Paint(element) {
+        var width = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 500;
+        var height = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 500;
+
         var _this = this;
+
+        var strokeStyle = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : '#ccc';
+        var linewidth = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : '5';
 
         _classCallCheck(this, Paint);
 
@@ -171,6 +177,9 @@ var Paint = function () {
             return _this.listener(e);
         });
         this._element.addEventListener("mousemove", function (e) {
+            return _this.listener(e);
+        });
+        this._element.addEventListener("mouseout", function (e) {
             return _this.listener(e);
         });
         // Init paint
@@ -212,6 +221,9 @@ var Paint = function () {
     }, {
         key: 'listener',
         value: function listener(event) {
+            if (event.type === 'mouseout') {
+                this._drawing = false;
+            }
             if (this._mode === 'line' || this.mode === 'rect') {
                 if (event.type === 'mousedown') {
                     this._drawing = false;
