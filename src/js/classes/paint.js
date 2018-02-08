@@ -153,6 +153,7 @@ class Paint {
                 );
                 this._ctx.fill();
                 this._ctx.closePath();
+                this._drawing = false;
             }
         }
     }
@@ -191,6 +192,8 @@ class Paint {
             img.src = reset;
             img.onload = () => {
                 this._ctx.clearRect(0, 0, this._element.width, this._element.height);
+                this._ctx.beginPath();
+                this._ctx.closePath();
                 this._ctx.drawImage(img, 0, 0, this._element.width, this._element.height, 0, 0, this._element.width, this._element.height);
             };
         } else if (resize) {

@@ -118,8 +118,7 @@ function setup() {
         window.location.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
     };
     reset.onclick = function () {
-        // pCanvas.reset();
-        pCanvas.resize(900, 800);
+        pCanvas.reset();
     };
     tool.onclick = function (e) {
         pCanvas.mode = e.target.value;
@@ -259,6 +258,7 @@ var Paint = function () {
                     this._ctx.rect(quadrant.x, quadrant.y, Math.abs(this._mousePosition.x - this._previousPosition.x), Math.abs(this._mousePosition.y - this._previousPosition.y));
                     this._ctx.fill();
                     this._ctx.closePath();
+                    this._drawing = false;
                 }
             }
         }
@@ -314,6 +314,8 @@ var Paint = function () {
                 img.src = reset;
                 img.onload = function () {
                     _this3._ctx.clearRect(0, 0, _this3._element.width, _this3._element.height);
+                    _this3._ctx.beginPath();
+                    _this3._ctx.closePath();
                     _this3._ctx.drawImage(img, 0, 0, _this3._element.width, _this3._element.height, 0, 0, _this3._element.width, _this3._element.height);
                 };
             } else if (resize) {

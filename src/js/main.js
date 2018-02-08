@@ -23,10 +23,10 @@ function setup() {
 
     document.onkeydown = (e) => {
         let eventobj = window.event ? window.event : e;
-        if (eventobj.key === 'z' && eventobj.ctrlKey && !eventobj.shiftKey){
+        if (eventobj.key === 'z' && eventobj.ctrlKey && !eventobj.shiftKey) {
             pCanvas.undo();
         }
-        else if (eventobj.key === 'Z' && eventobj.ctrlKey && eventobj.shiftKey){
+        else if (eventobj.key === 'Z' && eventobj.ctrlKey && eventobj.shiftKey) {
             pCanvas.redo();
         }
     };
