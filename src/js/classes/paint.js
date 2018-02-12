@@ -1,6 +1,7 @@
 class Paint {
-
-    constructor(element, width=500, height=500, strokeStyle='#ccc', linewidth='5', backgroundColor='#ffffff') {
+    constructor(element, width = 500, height = 500, strokeStyle = '#ccc', linewidth = '5', backgroundColor = '#ffffff', hooks = {}) {
+        this._hooks = hooks;
+        this.call("beforeCreate");
         // User parameters
         this._element = element;
         this._element.width = width;
@@ -10,6 +11,7 @@ class Paint {
         this._backgroundColor = backgroundColor;
         // Utility parameters
         this._drawing = false;
+        this._dragging = false;
         this._mousePosition = {x: 0, y: 0};
         this._previousPosition = {};
         this._ctx = this._element.getContext("2d");
@@ -27,12 +29,23 @@ class Paint {
         this._undo.push(this._element.toDataURL());
         this._redo = [];
         // Listeners
-        this._element.addEventListener("mousedown", (e) => this.listener(e));
-        this._element.addEventListener("mouseup", (e) => this.listener(e));
-        this._element.addEventListener("mousemove", (e) => this.listener(e));
-        this._element.addEventListener("mouseout", (e) => this.listener(e));
+        const listeners = ["onmousedown", "onmouseup", "onmousemove", "onmouseout"];
+        listeners.forEach(listener => {
+            this._element.addEventListener(listener, e => this.listener(e));
+        });
+        this.addResizeListeners();
         // Init paint
         this.drawloop();
+        this.call("afterCreate");
+
+    }
+
+    get hooks() {
+        return this._hooks;
+    }
+
+    set hooks(value) {
+        this._hooks = value;
     }
 
     get element() {
@@ -72,6 +85,7 @@ class Paint {
     }
 
     resize(width, height) {
+        this.call("beforeResize");
         this.save();
         const memory = document.createElement('canvas');
         let memoryCtx = memory.getContext('2d');
@@ -88,6 +102,7 @@ class Paint {
             this._ctx.fillStyle = this._backgroundColor;
             this._ctx.fillRect(0, 0, this._element.width, this._element.height);
             this._ctx.drawImage(memory, 0, 0);
+            this.call("afterResize");
 
             return 1;
         }
@@ -96,15 +111,19 @@ class Paint {
     }
 
     getMousePosition(event) {
+        this.call("beforeGetMousePosition");
         let rect = this._element.getBoundingClientRect();
-        return {
+        let pos = {
             x: event.clientX - rect.left,
             y: event.clientY - rect.top
         };
+        this.call("afterGetMousePosition");
+        return pos;
     }
 
     listener(event) {
-        if(event.type === 'mouseout'){
+        this.call("beforeListener");
+        if (event.type === 'mouseout') {
             this._drawing = false;
         }
         if (this._mode === 'line'
@@ -128,9 +147,11 @@ class Paint {
                 this._mousePosition = this.getMousePosition(event);
             }
         }
+        this.call("afterListener");
     }
 
     render() {
+        this.call("beforeRender");
         if (this._drawing) {
             if (this._mode === "free"
                 || this._mode === "eraser"
@@ -165,6 +186,7 @@ class Paint {
                 this._drawing = false;
             }
         }
+        this.call("afterRender");
     }
 
     drawloop() {
@@ -173,6 +195,7 @@ class Paint {
     }
 
     reset() {
+        this.call("beforeReset");
         this._ctx.clearRect(0, 0, this._element.width, this._element.height);
         this._ctx.beginPath();
         this._previousPosition = {x: 0, y: 0};
@@ -180,6 +203,7 @@ class Paint {
         this._ctx.closePath();
         this._undo = [];
         this._redo = [];
+        this.call("afterReset");
     }
 
     isset(parameter) {
@@ -188,12 +212,15 @@ class Paint {
 
     // Much needed credits for undo/redo functionality https://codepen.io/abidibo/
     save(list = this._undo, keepRedo = false) {
+        this.call("beforeSave");
         if (!keepRedo)
             this._redo = [];
         list.push(this._element.toDataURL());
+        this.call("afterSave");
     }
 
     restore(pop, push, resize = false) {
+        this.call("beforeRestore");
         if (pop.length && !resize) {
             this.save(push, true);
             const reset = pop.pop();
@@ -211,19 +238,63 @@ class Paint {
             }
             this.restore(pop, push);
         }
+        this.call("afterRestore");
     }
 
     undo() {
+        this.call("beforeUndo");
         this.restore(this._undo, this._redo);
+        this.call("afterUndo");
     }
 
     redo() {
+        this.call("beforeRedo");
         this.restore(this._redo, this._undo);
+        this.call("afterRedo");
     }
 
-    //TODO: Export canvas to PNG format
     export() {
+        this.call("beforeExport");
+        window.location.href = this._element.toDataURL("image/png").replace("image/png", "image/octet-stream");
+        this.call("afterExport");
+    }
 
+    addResizeListeners() {
+        this.call("beforeAddResizeListeners");
+        document.onmousedown = e => {
+            let pos = this.getMousePosition(e);
+            if (pos.x >= this._element.width
+                && pos.x < this._element.width + 10
+                && pos.y >= this._element.height
+                && pos.y < this._element.height + 10) {
+                this._dragging = true;
+            }
+            this.listener(e);
+        };
+        document.onmouseup = e => {
+            if (!this._dragging) {
+                this.listener(e);
+                return;
+            }
+            this._dragging = false;
+            let pos = this.getMousePosition(e);
+            this.resize(pos.x, pos.y);
+        };
+        document.onmousemove = e => {
+            if (!this._dragging) {
+                this.listener(e);
+                return;
+            }
+            let pos = this.getMousePosition(e);
+            this.resize(pos.x, pos.y);
+        };
+        this.call("afterAddResizeListeners");
+
+    }
+
+    call(hook) {
+        if(this.isset(this._hooks[hook]))
+            this._hooks[hook].callback(this._hooks[hook].args);
     }
 }
 

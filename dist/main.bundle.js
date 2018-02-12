@@ -78,10 +78,11 @@ var _DOM = __webpack_require__(2);
 
 var _DOM2 = _interopRequireDefault(_DOM);
 
+var _hook = __webpack_require__(3);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var _ = _DOM2.default._;
-var _t = _DOM2.default.toggleClass;
 
 var pCanvas = void 0;
 var canvas = _("#paintArea");
@@ -90,58 +91,15 @@ var size = _("#size");
 var exportAsPNG = _("#export");
 var reset = _("#reset");
 var tool = _("#tool");
-var dragging = true;
 
 window.addEventListener("load", setup);
 
 function setup() {
 
-    pCanvas = new _paint2.default(canvas, 1024, 652, color.value, size.value);
+    pCanvas = new _paint2.default(canvas, 1024, 652, color.value, size.value, '#ffffff', _hook.hooks);
     pCanvas.modes.forEach(function (mode) {
         return tool.innerHTML += '<option value="' + mode + '">' + mode + '</option>';
     });
-
-    // TODO: add in class logic + bound to fathers size
-    document.onmousedown = function (event) {
-        var rect = canvas.getBoundingClientRect();
-        var a = {
-            x: event.clientX - rect.left,
-            y: event.clientY - rect.top
-        };
-
-        if (a.x >= canvas.width && a.x < canvas.width + 10 && a.y >= canvas.height && a.y < canvas.height + 10) {
-
-            dragging = true;
-        }
-    };
-
-    document.onmouseup = function (event) {
-        console.log(event);
-        if (!dragging) return;
-        dragging = !dragging;
-        var rect = canvas.getBoundingClientRect();
-        var a = {
-            x: event.clientX - rect.left,
-            y: event.clientY - rect.top
-        };
-        pCanvas.resize(a.x, a.y);
-        _t(_("#main"), "draggable");
-        _t(canvas, "draggable");
-    };
-
-    document.onmouseover = function (event) {
-        var rect = canvas.getBoundingClientRect();
-        var a = {
-            x: event.clientX - rect.left,
-            y: event.clientY - rect.top
-        };
-
-        if (a.x >= canvas.width && a.x < canvas.width + 10 && a.y >= canvas.height && a.y < canvas.height + 10) {
-
-            _t(_("#main"), "draggable");
-            _t(canvas, "draggable");
-        }
-    };
 
     document.onkeydown = function (e) {
         var eventobj = window.event ? window.event : e;
@@ -159,7 +117,7 @@ function setup() {
         pCanvas.linewidth = e.target.value;
     };
     exportAsPNG.onclick = function () {
-        window.location.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+        pCanvas.export();
     };
     reset.onclick = function () {
         pCanvas.reset();
@@ -189,14 +147,17 @@ var Paint = function () {
         var width = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 500;
         var height = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 500;
         var strokeStyle = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : '#ccc';
+        var linewidth = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : '5';
 
         var _this = this;
 
-        var linewidth = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : '5';
         var backgroundColor = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : '#ffffff';
+        var hooks = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : {};
 
         _classCallCheck(this, Paint);
 
+        this._hooks = hooks;
+        this.call("beforeCreate");
         // User parameters
         this._element = element;
         this._element.width = width;
@@ -206,6 +167,7 @@ var Paint = function () {
         this._backgroundColor = backgroundColor;
         // Utility parameters
         this._drawing = false;
+        this._dragging = false;
         this._mousePosition = { x: 0, y: 0 };
         this._previousPosition = {};
         this._ctx = this._element.getContext("2d");
@@ -218,25 +180,22 @@ var Paint = function () {
         this._undo.push(this._element.toDataURL());
         this._redo = [];
         // Listeners
-        this._element.addEventListener("mousedown", function (e) {
-            return _this.listener(e);
+        var listeners = ["onmousedown", "onmouseup", "onmousemove", "onmouseout"];
+        listeners.forEach(function (listener) {
+            _this._element.addEventListener(listener, function (e) {
+                return _this.listener(e);
+            });
         });
-        this._element.addEventListener("mouseup", function (e) {
-            return _this.listener(e);
-        });
-        this._element.addEventListener("mousemove", function (e) {
-            return _this.listener(e);
-        });
-        this._element.addEventListener("mouseout", function (e) {
-            return _this.listener(e);
-        });
+        this.addResizeListeners();
         // Init paint
         this.drawloop();
+        this.call("afterCreate");
     }
 
     _createClass(Paint, [{
         key: 'resize',
         value: function resize(width, height) {
+            this.call("beforeResize");
             this.save();
             var memory = document.createElement('canvas');
             var memoryCtx = memory.getContext('2d');
@@ -253,6 +212,7 @@ var Paint = function () {
                 this._ctx.fillStyle = this._backgroundColor;
                 this._ctx.fillRect(0, 0, this._element.width, this._element.height);
                 this._ctx.drawImage(memory, 0, 0);
+                this.call("afterResize");
 
                 return 1;
             }
@@ -262,15 +222,19 @@ var Paint = function () {
     }, {
         key: 'getMousePosition',
         value: function getMousePosition(event) {
+            this.call("beforeGetMousePosition");
             var rect = this._element.getBoundingClientRect();
-            return {
+            var pos = {
                 x: event.clientX - rect.left,
                 y: event.clientY - rect.top
             };
+            this.call("afterGetMousePosition");
+            return pos;
         }
     }, {
         key: 'listener',
         value: function listener(event) {
+            this.call("beforeListener");
             if (event.type === 'mouseout') {
                 this._drawing = false;
             }
@@ -294,10 +258,12 @@ var Paint = function () {
                     this._mousePosition = this.getMousePosition(event);
                 }
             }
+            this.call("afterListener");
         }
     }, {
         key: 'render',
         value: function render() {
+            this.call("beforeRender");
             if (this._drawing) {
                 if (this._mode === "free" || this._mode === "eraser" || this._mode === 'line') {
                     this._ctx.beginPath();
@@ -323,6 +289,7 @@ var Paint = function () {
                     this._drawing = false;
                 }
             }
+            this.call("afterRender");
         }
     }, {
         key: 'drawloop',
@@ -337,6 +304,7 @@ var Paint = function () {
     }, {
         key: 'reset',
         value: function reset() {
+            this.call("beforeReset");
             this._ctx.clearRect(0, 0, this._element.width, this._element.height);
             this._ctx.beginPath();
             this._previousPosition = { x: 0, y: 0 };
@@ -344,6 +312,7 @@ var Paint = function () {
             this._ctx.closePath();
             this._undo = [];
             this._redo = [];
+            this.call("afterReset");
         }
     }, {
         key: 'isset',
@@ -359,8 +328,10 @@ var Paint = function () {
             var list = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this._undo;
             var keepRedo = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
+            this.call("beforeSave");
             if (!keepRedo) this._redo = [];
             list.push(this._element.toDataURL());
+            this.call("afterSave");
         }
     }, {
         key: 'restore',
@@ -369,6 +340,7 @@ var Paint = function () {
 
             var resize = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 
+            this.call("beforeRestore");
             if (pop.length && !resize) {
                 this.save(push, true);
                 var reset = pop.pop();
@@ -386,23 +358,74 @@ var Paint = function () {
                 }
                 this.restore(pop, push);
             }
+            this.call("afterRestore");
         }
     }, {
         key: 'undo',
         value: function undo() {
+            this.call("beforeUndo");
             this.restore(this._undo, this._redo);
+            this.call("afterUndo");
         }
     }, {
         key: 'redo',
         value: function redo() {
+            this.call("beforeRedo");
             this.restore(this._redo, this._undo);
+            this.call("afterRedo");
         }
-
-        //TODO: Export canvas to PNG format
-
     }, {
         key: 'export',
-        value: function _export() {}
+        value: function _export() {
+            this.call("beforeExport");
+            window.location.href = this._element.toDataURL("image/png").replace("image/png", "image/octet-stream");
+            this.call("afterExport");
+        }
+    }, {
+        key: 'addResizeListeners',
+        value: function addResizeListeners() {
+            var _this4 = this;
+
+            this.call("beforeAddResizeListeners");
+            document.onmousedown = function (e) {
+                var pos = _this4.getMousePosition(e);
+                if (pos.x >= _this4._element.width && pos.x < _this4._element.width + 10 && pos.y >= _this4._element.height && pos.y < _this4._element.height + 10) {
+                    _this4._dragging = true;
+                }
+                _this4.listener(e);
+            };
+            document.onmouseup = function (e) {
+                if (!_this4._dragging) {
+                    _this4.listener(e);
+                    return;
+                }
+                _this4._dragging = false;
+                var pos = _this4.getMousePosition(e);
+                _this4.resize(pos.x, pos.y);
+            };
+            document.onmousemove = function (e) {
+                if (!_this4._dragging) {
+                    _this4.listener(e);
+                    return;
+                }
+                var pos = _this4.getMousePosition(e);
+                _this4.resize(pos.x, pos.y);
+            };
+            this.call("afterAddResizeListeners");
+        }
+    }, {
+        key: 'call',
+        value: function call(hook) {
+            if (this.isset(this._hooks[hook])) this._hooks[hook].callback(this._hooks[hook].args);
+        }
+    }, {
+        key: 'hooks',
+        get: function get() {
+            return this._hooks;
+        },
+        set: function set(value) {
+            this._hooks = value;
+        }
     }, {
         key: 'element',
         get: function get() {
@@ -503,6 +526,84 @@ var DOM = function () {
 }();
 
 exports.default = DOM;
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Hook = exports.Hook = function () {
+    function Hook(event, time, callback, args) {
+        _classCallCheck(this, Hook);
+
+        this._event = event;
+        this._time = time;
+        this._callback = callback;
+        this._args = args;
+    }
+
+    _createClass(Hook, [{
+        key: "hook",
+        value: function hook(callback, args) {
+            this._callback = callback;
+            this._args = args;
+        }
+    }, {
+        key: "event",
+        get: function get() {
+            return this._event;
+        },
+        set: function set(value) {
+            this._event = value;
+        }
+    }, {
+        key: "time",
+        get: function get() {
+            return this._time;
+        },
+        set: function set(value) {
+            this._time = value;
+        }
+    }, {
+        key: "callback",
+        get: function get() {
+            return this._callback;
+        },
+        set: function set(value) {
+            this._callback = value;
+        }
+    }, {
+        key: "args",
+        get: function get() {
+            return this._args;
+        },
+        set: function set(value) {
+            this._args = value;
+        }
+    }]);
+
+    return Hook;
+}();
+
+var hooks = {};
+var timings = ["before", "after"];
+var events = ["Create", "Resize", "GetMousePosition", "Listener", "Render", "Reset", "Save", "Restore", "Undo", "Redo", "Export", "AddResizeListeners"];
+timings.forEach(function (timing) {
+    events.forEach(function (event) {
+        return hooks[timing + event] = new Hook(event, timing, function () {}, []);
+    });
+});
+exports.hooks = hooks;
 
 /***/ })
 /******/ ]);

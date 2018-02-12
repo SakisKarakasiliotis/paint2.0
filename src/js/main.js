@@ -1,8 +1,8 @@
 import Paint from './classes/paint.js';
 import DOM from './classes/DOM.js';
+import {hooks} from './classes/hook.js';
 
 const _ = DOM._;
-const _t = DOM.toggleClass;
 
 let pCanvas;
 let canvas = _("#paintArea");
@@ -11,7 +11,6 @@ let size = _("#size");
 let exportAsPNG = _("#export");
 let reset = _("#reset");
 let tool = _("#tool");
-let dragging = true;
 
 
 window.addEventListener("load", setup);
@@ -19,62 +18,10 @@ window.addEventListener("load", setup);
 
 function setup() {
 
-    pCanvas = new Paint(canvas, 1024, 652, color.value, size.value);
+    pCanvas = new Paint(canvas, 1024, 652, color.value, size.value, '#ffffff', hooks);
     pCanvas.modes.forEach((mode) =>
         tool.innerHTML += `<option value="${mode}">${mode}</option>`
     );
-
-    // TODO: add in class logic + bound to fathers size
-    document.onmousedown = (event) => {
-        let rect = canvas.getBoundingClientRect();
-        let a =  {
-            x: event.clientX - rect.left,
-            y: event.clientY - rect.top
-        };
-
-        if(a.x >= canvas.width
-            && a.x < canvas.width + 10
-            && a.y >= canvas.height
-            && a.y < canvas.height + 10){
-
-            dragging = true;
-
-        }
-
-    };
-
-    document.onmouseup = (event) => {
-        console.log(event);
-        if(!dragging) return;
-        dragging = !dragging;
-        let rect = canvas.getBoundingClientRect();
-        let a =  {
-            x: event.clientX - rect.left,
-            y: event.clientY - rect.top
-        };
-        pCanvas.resize(a.x, a.y);
-        _t(_("#main"), "draggable");
-        _t(canvas, "draggable")
-
-
-    };
-
-    document.onmouseover = (event) => {
-        let rect = canvas.getBoundingClientRect();
-        let a =  {
-            x: event.clientX - rect.left,
-            y: event.clientY - rect.top
-        };
-
-        if(a.x >= canvas.width
-            && a.x < canvas.width + 10
-            && a.y >= canvas.height
-            && a.y < canvas.height + 10){
-
-            _t(_("#main"), "draggable");
-            _t(canvas, "draggable")
-        }
-    }
 
     document.onkeydown = (e) => {
         let eventobj = window.event ? window.event : e;
@@ -93,7 +40,7 @@ function setup() {
         pCanvas.linewidth = e.target.value
     };
     exportAsPNG.onclick = () => {
-        window.location.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+        pCanvas.export();
     };
     reset.onclick = () => {
         pCanvas.reset();
