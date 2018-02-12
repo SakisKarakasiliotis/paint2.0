@@ -95,7 +95,6 @@ var tool = _("#tool");
 window.addEventListener("load", setup);
 
 function setup() {
-
     pCanvas = new _paint2.default(canvas, 1024, 652, color.value, size.value, '#ffffff', _hook.hooks);
     pCanvas.modes.forEach(function (mode) {
         return tool.innerHTML += '<option value="' + mode + '">' + mode + '</option>';
@@ -173,14 +172,15 @@ var Paint = function () {
         this._ctx = this._element.getContext("2d");
         this._mode = 'free';
         this._ctx.fillStyle = this._backgroundColor;
-        this._ctx.fillRect(0, 0, this._element.width, this._element.height);
+        // this._ctx.fillRect(0, 0, this._element.width, this._element.height);
+        this._element.style.backgroundColor = "white";
         // Helpers
         this._modes = ['free', 'rect', 'eraser', 'line'];
         this._undo = [];
         this._undo.push(this._element.toDataURL());
         this._redo = [];
         // Listeners
-        var listeners = ["onmousedown", "onmouseup", "onmousemove", "onmouseout"];
+        var listeners = ["onmousedown", "onmouseup", "onmousemove", "onmouseout", "touchstart", "touchmove", "touchend"];
         listeners.forEach(function (listener) {
             _this._element.addEventListener(listener, function (e) {
                 return _this.listener(e);
@@ -224,10 +224,18 @@ var Paint = function () {
         value: function getMousePosition(event) {
             this.call("beforeGetMousePosition");
             var rect = this._element.getBoundingClientRect();
-            var pos = {
-                x: event.clientX - rect.left,
-                y: event.clientY - rect.top
-            };
+            var pos = void 0;
+            if (!(this.isset(event.clientX) && this.isset(event.clientY))) {
+                pos = {
+                    x: event.changedTouches[0].clientX - rect.left,
+                    y: event.changedTouches[0].clientY - rect.top
+                };
+            } else {
+                pos = {
+                    x: event.clientX - rect.left,
+                    y: event.clientY - rect.top
+                };
+            }
             this.call("afterGetMousePosition");
             return pos;
         }
@@ -239,22 +247,22 @@ var Paint = function () {
                 this._drawing = false;
             }
             if (this._mode === 'line' || this.mode === 'rect') {
-                if (event.type === 'mousedown') {
+                if (event.type === 'mousedown' || event.type === 'touchstart') {
                     this._drawing = false;
                     this._previousPosition = this.getMousePosition(event);
-                } else if (event.type === 'mouseup') {
+                } else if (event.type === 'mouseup' || event.type === 'touchend') {
                     this.save();
                     this._drawing = true;
                     this._mousePosition = this.getMousePosition(event);
                 }
             } else {
-                if (event.type === 'mousedown') {
+                if (event.type === 'mousedown' || event.type === 'touchstart') {
                     this.save();
                     this._drawing = true;
                     this._previousPosition = this.getMousePosition(event);
-                } else if (event.type === 'mouseup') {
+                } else if (event.type === 'mouseup' || event.type === 'touchend') {
                     this._drawing = false;
-                } else if (event.type === 'mousemove') {
+                } else if (event.type === 'mousemove' || event.type === 'touchmove') {
                     this._mousePosition = this.getMousePosition(event);
                 }
             }
@@ -305,7 +313,7 @@ var Paint = function () {
         key: 'reset',
         value: function reset() {
             this.call("beforeReset");
-            this._ctx.fillStyle = this._backgroundColor;
+            this._ctx.fillStyle = "#ffffff";
             this._ctx.fillRect(0, 0, this._element.width, this._element.height);
             this._ctx.beginPath();
             this._previousPosition = { x: 0, y: 0 };

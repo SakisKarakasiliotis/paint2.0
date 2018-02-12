@@ -17,7 +17,6 @@ window.addEventListener("load", setup);
 
 
 function setup() {
-
     pCanvas = new Paint(canvas, 1024, 652, color.value, size.value, '#ffffff', hooks);
     pCanvas.modes.forEach((mode) =>
         tool.innerHTML += `<option value="${mode}">${mode}</option>`

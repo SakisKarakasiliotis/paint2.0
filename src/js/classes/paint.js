@@ -17,7 +17,8 @@ class Paint {
         this._ctx = this._element.getContext("2d");
         this._mode = 'free';
         this._ctx.fillStyle = this._backgroundColor;
-        this._ctx.fillRect(0, 0, this._element.width, this._element.height);
+        // this._ctx.fillRect(0, 0, this._element.width, this._element.height);
+        this._element.style.backgroundColor = "white";
         // Helpers
         this._modes = [
             'free',
@@ -29,7 +30,7 @@ class Paint {
         this._undo.push(this._element.toDataURL());
         this._redo = [];
         // Listeners
-        const listeners = ["onmousedown", "onmouseup", "onmousemove", "onmouseout"];
+        const listeners = ["onmousedown", "onmouseup", "onmousemove", "onmouseout", "touchstart", "touchmove", "touchend"];
         listeners.forEach(listener => {
             this._element.addEventListener(listener, e => this.listener(e));
         });
@@ -113,10 +114,18 @@ class Paint {
     getMousePosition(event) {
         this.call("beforeGetMousePosition");
         let rect = this._element.getBoundingClientRect();
-        let pos = {
-            x: event.clientX - rect.left,
-            y: event.clientY - rect.top
-        };
+        let pos;
+        if (!(this.isset(event.clientX) && this.isset(event.clientY))) {
+            pos = {
+                x: event.changedTouches[0].clientX - rect.left,
+                y: event.changedTouches[0].clientY - rect.top
+            };
+        } else {
+            pos = {
+                x: event.clientX - rect.left,
+                y: event.clientY - rect.top
+            };
+        }
         this.call("afterGetMousePosition");
         return pos;
     }
@@ -128,22 +137,27 @@ class Paint {
         }
         if (this._mode === 'line'
             || this.mode === 'rect') {
-            if (event.type === 'mousedown') {
+            if (event.type === 'mousedown'
+                || event.type === 'touchstart') {
                 this._drawing = false;
                 this._previousPosition = this.getMousePosition(event);
-            } else if (event.type === 'mouseup') {
+            } else if (event.type === 'mouseup'
+                || event.type === 'touchend') {
                 this.save();
                 this._drawing = true;
                 this._mousePosition = this.getMousePosition(event);
             }
         } else {
-            if (event.type === 'mousedown') {
+            if (event.type === 'mousedown'
+                || event.type === 'touchstart') {
                 this.save();
                 this._drawing = true;
                 this._previousPosition = this.getMousePosition(event);
-            } else if (event.type === 'mouseup') {
+            } else if (event.type === 'mouseup'
+                || event.type === 'touchend') {
                 this._drawing = false;
-            } else if (event.type === 'mousemove') {
+            } else if (event.type === 'mousemove'
+                || event.type === 'touchmove') {
                 this._mousePosition = this.getMousePosition(event);
             }
         }
@@ -196,7 +210,7 @@ class Paint {
 
     reset() {
         this.call("beforeReset");
-        this._ctx.fillStyle = this._backgroundColor;
+        this._ctx.fillStyle = "#ffffff";
         this._ctx.fillRect(0, 0, this._element.width, this._element.height);
         this._ctx.beginPath();
         this._previousPosition = {x: 0, y: 0};
