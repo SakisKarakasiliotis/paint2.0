@@ -305,7 +305,8 @@ var Paint = function () {
         key: 'reset',
         value: function reset() {
             this.call("beforeReset");
-            this._ctx.clearRect(0, 0, this._element.width, this._element.height);
+            this._ctx.fillStyle = this._backgroundColor;
+            this._ctx.fillRect(0, 0, this._element.width, this._element.height);
             this._ctx.beginPath();
             this._previousPosition = { x: 0, y: 0 };
             this._mousePosition = { x: 0, y: 0 };
@@ -374,6 +375,9 @@ var Paint = function () {
             this.restore(this._redo, this._undo);
             this.call("afterRedo");
         }
+
+        // TODO: BUG ON EDGE NEED TO FIX THE EXPORT METHOD WITH A BETTER ONE
+
     }, {
         key: 'export',
         value: function _export() {

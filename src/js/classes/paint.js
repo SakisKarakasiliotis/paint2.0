@@ -196,7 +196,8 @@ class Paint {
 
     reset() {
         this.call("beforeReset");
-        this._ctx.clearRect(0, 0, this._element.width, this._element.height);
+        this._ctx.fillStyle = this._backgroundColor;
+        this._ctx.fillRect(0, 0, this._element.width, this._element.height);
         this._ctx.beginPath();
         this._previousPosition = {x: 0, y: 0};
         this._mousePosition = {x: 0, y: 0};
@@ -253,6 +254,7 @@ class Paint {
         this.call("afterRedo");
     }
 
+    // TODO: BUG ON EDGE NEED TO FIX THE EXPORT METHOD WITH A BETTER ONE
     export() {
         this.call("beforeExport");
         window.location.href = this._element.toDataURL("image/png").replace("image/png", "image/octet-stream");
@@ -293,7 +295,7 @@ class Paint {
     }
 
     call(hook) {
-        if(this.isset(this._hooks[hook]))
+        if (this.isset(this._hooks[hook]))
             this._hooks[hook].callback(this._hooks[hook].args);
     }
 }
