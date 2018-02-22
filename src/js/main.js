@@ -17,6 +17,11 @@ window.addEventListener("load", setup);
 
 
 function setup() {
+    
+    _(".controls input").forEach(el => el.addClass("PEOS"));
+    
+    
+
     pCanvas = new Paint(canvas, 1024, 652, color.value, size.value, '#ffffff', hooks);
     pCanvas.modes.forEach((mode) =>
         tool.innerHTML += `<option value="${mode}">${mode}</option>`

@@ -25,4 +25,33 @@ class DOM {
     }
 }
 
+NodeList.prototype.get = function (i) {
+    return this[i];
+}
+NodeList.prototype.hasClass = function (className) {
+    return this[0].classList.contains(className);
+}
+Node.prototype.hasClass = function (className) {
+    return this.classList.contains(className);
+}
+NodeList.prototype.addClass = function (className) {
+    return this[0].classList.add(className);
+}
+Node.prototype.addClass = function (className) {
+    return this.classList.add(className);
+}
+NodeList.prototype.removeClass = function (className) {
+    return this[0].classList.remove(className);
+}
+Node.prototype.removeClass = function (className) {
+    return this.classList.remove(className);
+}
+NodeList.prototype.toggleClass = function (className) {
+    return this[0].classList.toggle(className);
+}
+Node.prototype.toggleClass = function (className) {
+    return this.classList.toggle(className);
+}
+
+
 export default DOM;

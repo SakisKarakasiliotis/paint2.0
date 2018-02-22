@@ -95,6 +95,11 @@ var tool = _("#tool");
 window.addEventListener("load", setup);
 
 function setup() {
+
+    _(".controls input").forEach(function (el) {
+        return el.addClass("PEOS");
+    });
+
     pCanvas = new _paint2.default(canvas, 1024, 652, color.value, size.value, '#ffffff', _hook.hooks);
     pCanvas.modes.forEach(function (mode) {
         return tool.innerHTML += '<option value="' + mode + '">' + mode + '</option>';
@@ -242,7 +247,6 @@ var Paint = function () {
         key: 'listener',
         value: function listener(event) {
             this.call("beforeListener");
-
             if (event.type === 'mouseout') {
                 this._drawing = false;
             }
@@ -537,6 +541,34 @@ var DOM = function () {
 
     return DOM;
 }();
+
+NodeList.prototype.get = function (i) {
+    return this[i];
+};
+NodeList.prototype.hasClass = function (className) {
+    return this[0].classList.contains(className);
+};
+Node.prototype.hasClass = function (className) {
+    return this.classList.contains(className);
+};
+NodeList.prototype.addClass = function (className) {
+    return this[0].classList.add(className);
+};
+Node.prototype.addClass = function (className) {
+    return this.classList.add(className);
+};
+NodeList.prototype.removeClass = function (className) {
+    return this[0].classList.remove(className);
+};
+Node.prototype.removeClass = function (className) {
+    return this.classList.remove(className);
+};
+NodeList.prototype.toggleClass = function (className) {
+    return this[0].classList.toggle(className);
+};
+Node.prototype.toggleClass = function (className) {
+    return this.classList.toggle(className);
+};
 
 exports.default = DOM;
 
