@@ -172,7 +172,6 @@ var Paint = function () {
         this._ctx = this._element.getContext("2d");
         this._mode = 'free';
         this._ctx.fillStyle = this._backgroundColor;
-        // this._ctx.fillRect(0, 0, this._element.width, this._element.height);
         this._element.style.backgroundColor = "white";
         // Helpers
         this._modes = ['free', 'rect', 'eraser', 'line'];
@@ -243,6 +242,7 @@ var Paint = function () {
         key: 'listener',
         value: function listener(event) {
             this.call("beforeListener");
+
             if (event.type === 'mouseout') {
                 this._drawing = false;
             }
@@ -266,6 +266,7 @@ var Paint = function () {
                     this._mousePosition = this.getMousePosition(event);
                 }
             }
+
             this.call("afterListener");
         }
     }, {
